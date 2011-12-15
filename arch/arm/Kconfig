@@ -1139,6 +1139,8 @@ config PLAT_ORION
 	bool
 	select CLKSRC_MMIO
 	select GENERIC_IRQ_CHIP
+	select COMMON_CLK
+	select CLKDEV_LOOKUP
 
 config PLAT_PXA
 	bool
