@@ -116,6 +116,8 @@ static void __init clk_init(void)
 	orion_clkdev_add("0", "sata_mv.0", sata0);
 	orion_clkdev_add("1", "sata_mv.0", sata1);
 	orion_clkdev_add(NULL, "orion-ehci.0", usb0);
+	orion_clkdev_add(NULL, "orion-nand.0", runit);
+	orion_clkdev_add(NULL, "orion-nand.0", runit);
 }
 
 /*****************************************************************************
