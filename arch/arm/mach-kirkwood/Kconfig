@@ -58,6 +58,29 @@ config MACH_DREAMPLUG_DT
 	  Say 'Y' here if you want your kernel to support the
 	  Marvell DreamPlug (Flattened Device Tree).
 
+config MACH_DNSKW_DT
+        bool
+
+config MACH_DNS320_DT
+	bool "D-Link DNS-320 (Flattened Device Tree)"
+	select ARCH_KIRKWOOD_DT
+	select MACH_DNSKW_DT
+	select CONFIG_MTD_OF_PARTS
+	select CONFIG_SERIAL_OF_PLATFORM
+	help
+	  Say 'Y' here if you want your kernel to support the
+	  D-Link DNS-320 NAS, using Flattened Device Tree.
+
+config MACH_DNS325_DT
+	bool "D-Link DNS-325 (Flattened Device Tree)"
+	select ARCH_KIRKWOOD_DT
+	select MACH_DNSKW_DT
+	select CONFIG_MTD_OF_PARTS
+	select CONFIG_SERIAL_OF_PLATFORM
+	help
+	  Say 'Y' here if you want your kernel to support the
+	  D-Link DNS-325 NAS, using Flattened Device Tree.
+
 config MACH_TS219
 	bool "QNAP TS-110, TS-119, TS-119P+, TS-210, TS-219, TS-219P and TS-219P+ Turbo NAS"
 	help
