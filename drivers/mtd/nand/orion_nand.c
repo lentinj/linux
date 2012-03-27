@@ -13,6 +13,7 @@
 #include <linux/slab.h>
 #include <linux/module.h>
 #include <linux/platform_device.h>
+#include <linux/of.h>
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/nand.h>
 #include <linux/mtd/partitions.h>
@@ -74,11 +75,13 @@ static void orion_nand_read_buf(struct mtd_info *mtd, uint8_t *buf, int len)
 static int __init orion_nand_probe(struct platform_device *pdev)
 {
 	struct mtd_info *mtd;
+	struct mtd_part_parser_data ppdata = {};
 	struct nand_chip *nc;
 	struct orion_nand_data *board;
 	struct resource *res;
 	void __iomem *io_base;
 	int ret = 0;
+	u32 val = 0;
 
 	nc = kzalloc(sizeof(struct nand_chip) + sizeof(struct mtd_info), GFP_KERNEL);
 	if (!nc) {
@@ -101,7 +104,25 @@ static int __init orion_nand_probe(struct platform_device *pdev)
 		goto no_res;
 	}
 
-	board = pdev->dev.platform_data;
+	if (pdev->dev.of_node) {
+		board = devm_kzalloc(&pdev->dev, sizeof(struct orion_nand_data),
+					GFP_KERNEL);
+		if (!board) {
+			printk(KERN_ERR "orion_nand: failed to allocate board structure.\n");
+			ret = -ENOMEM;
+			goto no_res;
+		}
+		if (!of_property_read_u32(pdev->dev.of_node, "cle", &val))
+			board->cle = (u8)val;
+		if (!of_property_read_u32(pdev->dev.of_node, "ale", &val))
+			board->ale = (u8)val;
+		if (!of_property_read_u32(pdev->dev.of_node, "width", &val))
+			board->width = (u8)val;
+		if (!of_property_read_u32(pdev->dev.of_node,
+						"chip-delay", &val))
+			board->chip_delay = (u8)val;
+	} else
+		board = pdev->dev.platform_data;
 
 	mtd->priv = nc;
 	mtd->owner = THIS_MODULE;
@@ -129,7 +150,8 @@ static int __init orion_nand_probe(struct platform_device *pdev)
 	}
 
 	mtd->name = "orion_nand";
-	ret = mtd_device_parse_register(mtd, NULL, 0,
+	ppdata.of_node = pdev->dev.of_node;
+	ret = mtd_device_parse_register(mtd, NULL, &ppdata,
 			board->parts, board->nr_parts);
 	if (ret) {
 		nand_release(mtd);
@@ -161,11 +183,19 @@ static int __devexit orion_nand_remove(struct platform_device *pdev)
 	return 0;
 }
 
+#ifdef CONFIG_OF
+static struct of_device_id orion_nand_of_match_table[] = {
+	{ .compatible = "mrvl,orion-nand", },
+	{},
+};
+#endif
+
 static struct platform_driver orion_nand_driver = {
 	.remove		= __devexit_p(orion_nand_remove),
 	.driver		= {
 		.name	= "orion_nand",
 		.owner	= THIS_MODULE,
+		.of_match_table = of_match_ptr(orion_nand_of_match_table),
 	},
 };
 
