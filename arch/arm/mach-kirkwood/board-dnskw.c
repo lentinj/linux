@@ -23,7 +23,6 @@
 #include <linux/gpio_keys.h>
 #include <linux/gpio-fan.h>
 #include <linux/leds.h>
-#include <linux/mtd/physmap.h>
 #include <asm/mach-types.h>
 #include <asm/mach/arch.h>
 #include <asm/mach/map.h>
@@ -31,35 +30,6 @@
 #include <mach/bridge-regs.h>
 #include "common.h"
 #include "mpp.h"
-
-static struct mtd_partition dnskw_nand_parts[] = {
-	{
-		.name		= "u-boot",
-		.offset		= 0,
-		.size		= SZ_1M,
-		.mask_flags	= MTD_WRITEABLE
-	}, {
-		.name		= "uImage",
-		.offset		= MTDPART_OFS_NXTBLK,
-		.size		= 5 * SZ_1M
-	}, {
-		.name		= "ramdisk",
-		.offset		= MTDPART_OFS_NXTBLK,
-		.size		= 5 * SZ_1M
-	}, {
-		.name		= "image",
-		.offset		= MTDPART_OFS_NXTBLK,
-		.size		= 102 * SZ_1M
-	}, {
-		.name		= "mini firmware",
-		.offset		= MTDPART_OFS_NXTBLK,
-		.size		= 10 * SZ_1M
-	}, {
-		.name		= "config",
-		.offset		= MTDPART_OFS_NXTBLK,
-		.size		= 5 * SZ_1M
-	},
-};
 
 static struct mv643xx_eth_platform_data dnskw_ge00_data = {
 	.phy_addr	= MV643XX_ETH_PHY_ADDR(8),
@@ -272,7 +242,6 @@ static void __init dnskw_gpio_register(unsigned gpio, char *name, int def)
 void __init dnskw_init(void)
 {
 	kirkwood_mpp_conf(dnskw_mpp_config);
-	kirkwood_nand_init(ARRAY_AND_SIZE(dnskw_nand_parts), 25);
 
 	kirkwood_ehci_init();
 	kirkwood_ge00_init(&dnskw_ge00_data);
