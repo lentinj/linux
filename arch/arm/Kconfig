@@ -582,6 +582,7 @@ config ARCH_KIRKWOOD
 	select ARCH_REQUIRE_GPIOLIB
 	select GENERIC_CLOCKEVENTS
 	select NEED_MACH_IO_H
+	select COMMON_CLK_DISABLE_UNUSED
 	select PLAT_ORION
 	help
 	  Support for the following Marvell Kirkwood series SoCs:
