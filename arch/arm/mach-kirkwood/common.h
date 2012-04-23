@@ -75,6 +75,8 @@ void kirkwood_crypto_init(void);
 extern int kirkwood_tclk;
 extern struct sys_timer kirkwood_timer;
 
+void __init clk_init(void);
+
 #define ARRAY_AND_SIZE(x)	(x), ARRAY_SIZE(x)
 
 #endif

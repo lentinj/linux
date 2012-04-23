@@ -242,6 +242,7 @@ static void __init dnskw_gpio_register(unsigned gpio, char *name, int def)
 void __init dnskw_init(void)
 {
 	kirkwood_mpp_conf(dnskw_mpp_config);
+	kirkwood_nand_init(NULL, 0, 25);
 
 	kirkwood_ehci_init();
 	kirkwood_ge00_init(&dnskw_ge00_data);
