@@ -24,6 +24,11 @@ static struct of_device_id kirkwood_dt_match_table[] __initdata = {
 	{ }
 };
 
+struct of_dev_auxdata kirkwood_dt_auxdata_lookup[] __initdata = {
+	OF_DEV_AUXDATA("mrvl,orion-nand", KIRKWOOD_NAND_MEM_PHYS_BASE, "orion_nand", NULL),
+	{ }
+};
+
 static void __init kirkwood_dt_init(void)
 {
 	pr_info("Kirkwood: %s, TCLK=%d.\n", kirkwood_id(), kirkwood_tclk);
@@ -58,7 +63,8 @@ static void __init kirkwood_dt_init(void)
 	if (of_machine_is_compatible("dlink,dns-kirkwood"))
 		dnskw_init();
 
-	of_platform_populate(NULL, kirkwood_dt_match_table, NULL, NULL);
+	of_platform_populate(NULL, kirkwood_dt_match_table,
+			kirkwood_dt_auxdata_lookup, NULL);
 }
 
 static const char *kirkwood_dt_board_compat[] = {
