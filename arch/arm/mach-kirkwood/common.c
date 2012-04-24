@@ -237,6 +237,7 @@ void __init clk_init(void)
 	orion_clkdev_add("1", "sata_mv.0", sata1);
 	orion_clkdev_add(NULL, "orion-ehci.0", usb0);
 	orion_clkdev_add(NULL, "orion_nand", runit);
+	orion_clkdev_add(NULL, "f4000000.nand", runit);
 	orion_clkdev_add(NULL, "mvsdio", sdio);
 	orion_clkdev_add(NULL, "mv_crypto", crypto);
 	orion_clkdev_add(NULL, MV_XOR_SHARED_NAME ".0", xor0);
