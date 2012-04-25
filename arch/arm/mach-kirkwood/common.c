@@ -199,7 +199,7 @@ static struct clk __init *kirkwood_register_gate_fn(const char *name,
 				    bit_idx, 0, &gating_lock, fn);
 }
 
-static void __init clk_init(void)
+void __init clk_init(void)
 {
 	struct clk *runit, *ge0, *ge1, *sata0, *sata1, *usb0, *sdio;
 	struct clk *crypto, *xor0, *xor1, *pex0, *pex1, *audio;
