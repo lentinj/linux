@@ -15,6 +15,28 @@
 		bootargs = "console=ttyS0,115200n8 earlyprintk";
 	};
 
+	gpio-keys {
+		compatible = "gpio-keys";
+		power {
+			label = "Power button";
+			gpios = <&gpio_high 2 1>; /* GPIO 34 Active Low */
+			linux,code = <116>; /* KEY_POWER */
+			gpio-key,wakeup;
+		};
+		usb-unmount {
+			label = "USB unmount button";
+			gpios = <&gpio_high 15 1>; /* GPIO 47 Active Low */
+			linux,code = <161>; /* KEY_EJECTCD */
+			gpio-key,wakeup;
+		};
+		reset {
+			label = "Reset button";
+			gpios = <&gpio_high 16 1>; /* GPIO 48 Active Low */
+			linux,code = <408>; /* KEY_RESTART */
+			gpio-key,wakeup;
+		};
+	};
+
 	ocp@f1000000 {
 		serial@12000 {
 			clock-frequency = <166666667>;

@@ -164,41 +164,6 @@ static struct i2c_board_info dns325_i2c_board_info[] __initdata = {
 	/* Something at 0x0c also */
 };
 
-static struct gpio_keys_button dnskw_button_pins[] = {
-	{
-		.code		= KEY_POWER,
-		.gpio		= 34,
-		.desc		= "Power button",
-		.active_low	= 1,
-	},
-	{
-		.code		= KEY_EJECTCD,
-		.gpio		= 47,
-		.desc		= "USB unmount button",
-		.active_low	= 1,
-	},
-	{
-		.code		= KEY_RESTART,
-		.gpio		= 48,
-		.desc		= "Reset button",
-		.active_low	= 1,
-	},
-};
-
-static struct gpio_keys_platform_data dnskw_button_data = {
-	.buttons	= dnskw_button_pins,
-	.nbuttons	= ARRAY_SIZE(dnskw_button_pins),
-};
-
-static struct platform_device dnskw_button_device = {
-	.name		= "gpio-keys",
-	.id		= -1,
-	.num_resources	= 0,
-	.dev		= {
-		.platform_data	= &dnskw_button_data,
-	}
-};
-
 /* Fan: ADDA AD045HB-G73 40mm 6000rpm@5v */
 static struct gpio_fan_speed dnskw_fan_speed[] = {
 	{    0,  0 },
@@ -248,7 +213,6 @@ void __init dnskw_init(void)
 	kirkwood_sata_init(&dnskw_sata_data);
 	kirkwood_i2c_init();
 
-	platform_device_register(&dnskw_button_device);
 	platform_device_register(&dnskw_fan_device);
 
 	if (of_machine_is_compatible("dlink,dns-325")) {
