@@ -63,6 +63,16 @@ config GPIO_SYSFS
 	  Kernel drivers may also request that a particular GPIO be
 	  exported to userspace; this can be useful when debugging.
 
+config GPIO_POWEROFF
+	tristate "GPIO power-off driver"
+	depends on OF_GPIO
+	help
+	  This driver supports turning off your device via. a GPIO call.
+	  If your device needs a GPIO high/low to power down, say Y and
+	  create a binding in your devicetree.
+
+	  If unsure, say N
+
 config GPIO_GENERIC
 	tristate
 
