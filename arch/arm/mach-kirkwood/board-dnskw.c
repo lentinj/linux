@@ -103,11 +103,6 @@ static struct platform_device dnskw_fan_device = {
 	},
 };
 
-static void dnskw_power_off(void)
-{
-	gpio_set_value(36, 1);
-}
-
 /* Register any GPIO for output and set the value */
 static void __init dnskw_gpio_register(unsigned gpio, char *name, int def)
 {
@@ -135,13 +130,6 @@ void __init dnskw_init(void)
 		i2c_register_board_info(0, dns325_i2c_board_info,
 					ARRAY_SIZE(dns325_i2c_board_info));
 	}
-
-	/* Register power-off GPIO. */
-	if (gpio_request(36, "dnskw:power:off") == 0
-	    && gpio_direction_output(36, 0) == 0)
-		pm_power_off = dnskw_power_off;
-	else
-		pr_err("dnskw: failed to configure power-off GPIO\n");
 
 	/* Ensure power is supplied to both HDDs */
 	dnskw_gpio_register(39, "dnskw:power:sata0", 1);
