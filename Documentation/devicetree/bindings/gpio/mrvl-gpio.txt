@@ -21,3 +21,23 @@ Example:
 		interrupt-controller;
 		#interrupt-cells = <1>;
       };
+
+* Marvell orion / kirkwood GPIO controller
+
+Required properties:
+- compatible : should be at least "mrvl,orion-gpio"
+- reg : address/length of the gpio registers
+- interrupts : base interrupt for the gpios
+- #gpio-cells : should be 2. First is the pin number and the second gpio flag
+  (for instance for the active low flag)
+- gpio-controller
+
+Example:
+	gpio_low: gpio@10100 {
+		compatible = "mrvl,kirkwood-gpio","mrvl,orion-gpio";
+		reg = <0x10100 0x40>;
+		interrupts = <64>;
+		#gpio-cells = <2>;
+		gpio-controller;
+	};
+

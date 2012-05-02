@@ -13,6 +13,7 @@
 
 #include <linux/init.h>
 #include <linux/types.h>
+#include <linux/errno.h>
 
 /*
  * Orion-specific GPIO API extensions.
@@ -27,6 +28,14 @@ void orion_gpio_set_valid(unsigned pin, int mode);
 /* Initialize gpiolib. */
 void __init orion_gpio_init(int gpio_base, int ngpio,
 			    u32 base, int mask_offset, int secondary_irq_base);
+#ifdef CONFIG_OF_GPIO
+int __init orion_of_gpio_init(void);
+#else
+static inline int __init orion_of_gpio_init(void)
+{
+	return -EINVAL;
+}
+#endif
 
 /*
  * GPIO interrupt handling.

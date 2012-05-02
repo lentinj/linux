@@ -3,6 +3,11 @@
 / {
 	compatible = "mrvl,kirkwood";
 
+	aliases {
+		gpio0 = &gpio_low;
+		gpio1 = &gpio_high;
+	};
+
 	ocp@f1000000 {
 		compatible = "simple-bus";
 		ranges = <0 0xf1000000 0x4000000>;
@@ -27,10 +32,28 @@
 			status = "disabled";
 		};
 
+		gpio_low: gpio@10100 {
+			compatible = "mrvl,kirkwood-gpio","mrvl,orion-gpio";
+			reg = <0x10100 0x40>;
+			interrupts = <64>;
+			#gpio-cells = <2>;
+			gpio-controller;
+		};
+
+		gpio_high: gpio@10140 {
+			compatible = "mrvl,kirkwood-gpio","mrvl,orion-gpio";
+			reg = <0x10140 0x40>;
+			interrupts = <96>;
+			#gpio-cells = <2>;
+			gpio-controller;
+			interrupt-controller;
+		};
+
 		rtc@10300 {
 			compatible = "mrvl,kirkwood-rtc", "mrvl,orion-rtc";
 			reg = <0x10300 0x20>;
 			interrupts = <53>;
+			interrupt-controller;
 		};
 
 		nand@3000000 {

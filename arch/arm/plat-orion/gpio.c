@@ -16,6 +16,9 @@
 #include <linux/bitops.h>
 #include <linux/io.h>
 #include <linux/gpio.h>
+#include <linux/of_address.h>
+#include <linux/of_irq.h>
+#include <linux/of_gpio.h>
 
 /*
  * GPIO unit register offsets.
@@ -378,8 +381,9 @@ static int gpio_irq_set_type(struct irq_data *d, u32 type)
 	return 0;
 }
 
-void __init orion_gpio_init(int gpio_base, int ngpio,
-			    u32 base, int mask_offset, int secondary_irq_base)
+static void __init _orion_gpio_init(int gpio_base, int ngpio,
+			u32 base, int mask_offset,
+			int secondary_irq_base, struct device_node *np)
 {
 	struct orion_gpio_chip *ochip;
 	struct irq_chip_generic *gc;
@@ -403,13 +407,15 @@ void __init orion_gpio_init(int gpio_base, int ngpio,
 	ochip->chip.base = gpio_base;
 	ochip->chip.ngpio = ngpio;
 	ochip->chip.can_sleep = 0;
+#if defined(CONFIG_OF_GPIO)
+	ochip->chip.of_node = np;
+#endif
 	spin_lock_init(&ochip->lock);
 	ochip->base = (void __iomem *)base;
 	ochip->valid_input = 0;
 	ochip->valid_output = 0;
 	ochip->mask_offset = mask_offset;
 	ochip->secondary_irq_base = secondary_irq_base;
-
 	gpiochip_add(&ochip->chip);
 
 	orion_gpio_chip_count++;
@@ -445,6 +451,62 @@ void __init orion_gpio_init(int gpio_base, int ngpio,
 	irq_setup_generic_chip(gc, IRQ_MSK(ngpio), IRQ_GC_INIT_MASK_CACHE,
 			       IRQ_NOREQUEST, IRQ_LEVEL | IRQ_NOPROBE);
 }
+
+void __init orion_gpio_init(int gpio_base, int ngpio,
+			    u32 base, int mask_offset, int secondary_irq_base)
+{
+	_orion_gpio_init(gpio_base, ngpio, base, mask_offset,
+			secondary_irq_base, NULL);
+}
+
+static const int mv78xx0_ngpios[] = { 32 };
+static const int orion5x_ngpios[] = { 32 };
+static const int kirkwood_ngpios[] = { 32, 18 };
+static const int dove_ngpios[] = { 32, 32, 8 };
+
+#ifdef CONFIG_OF_GPIO
+int __init orion_of_gpio_init(void)
+{
+	struct device_node *np = NULL;
+	int idx, found;
+	u32 base, irq, ngpios;
+
+	found = 0;
+	ngpios = 32;
+	for_each_compatible_node(np, NULL, "mrvl,orion-gpio") {
+		idx = of_alias_get_id(np, "gpio");
+
+		base = (u32)of_iomap(np, 0);
+		if (!base) {
+			pr_err("orion-gpio%d, failed to map registers, ignoring.\n",
+				idx);
+			continue;
+		}
+
+		if (of_property_read_u32(np, "interrupts", &irq)) {
+			pr_err("orion-gpio%d, failed to get interrupts property, ignoring.\n",
+				idx);
+			continue;
+		}
+
+		if (of_device_is_compatible(np, "mrvl,mv78xx0-gpio"))
+			ngpios = mv78xx0_ngpios[idx];
+		if (of_device_is_compatible(np, "mrvl,orion5x-gpio"))
+			ngpios = orion5x_ngpios[idx];
+		if (of_device_is_compatible(np, "mrvl,kirkwood-gpio"))
+			ngpios = kirkwood_ngpios[idx];
+		if (of_device_is_compatible(np, "mrvl,dove-gpio"))
+			ngpios = dove_ngpios[idx];
+
+		found = 1;
+		_orion_gpio_init(idx*32, ngpios, base, 0, irq, np);
+	}
+	if (found)
+		return 0;
+
+	return -EINVAL;
+}
+#endif
 
 void orion_gpio_irq_handler(int pinoff)
 {
