@@ -188,7 +188,7 @@ config PINCTRL_EXYNOS4
 
 config PINCTRL_MVEBU
 	bool
-	depends on ARCH_MVEBU
+	depends on ARCH_MVEBU || ARCH_KIRKWOOD
 	select PINMUX
 	select PINCONF
 

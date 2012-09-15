@@ -548,6 +548,8 @@ config ARCH_KIRKWOOD
 	select GENERIC_CLOCKEVENTS
 	select PCI
 	select PLAT_ORION_LEGACY
+	select PINCTRL
+	select PINCTRL_KIRKWOOD
 	help
 	  Support for the following Marvell Kirkwood series SoCs:
 	  88F6180, 88F6192 and 88F6281.
