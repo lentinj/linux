@@ -16,6 +16,47 @@
 	};
 
 	ocp@f1000000 {
+		pinctrl: pinctrl@10000 {
+			compatible = "marvell,88f6281-pinctrl";
+			reg = <0x10000 0x20>;
+
+			pinctrl-0 = < &pmx_nand
+				      &pmx_led_os_red &pmx_power_off
+				      &pmx_led_os_green &pmx_led_usb_transfer
+				      &pmx_button_reset &pmx_button_usb_copy >;
+			pinctrl-names = "default";
+
+			pmx_nand: pmx-nand {
+				marvell,pins = "mpp0", "mpp1", "mpp2", "mpp3",
+					       "mpp04", "mpp5", "mpp18",
+					       "mpp19";
+				marvell,function = "nand";
+			};
+			pmx_led_os_red: pmx-led-os-red {
+				marvell,pins = "mpp22";
+				marvell,function = "gpio";
+			};
+			pmx_power_off: pmx-power-off {
+				marvell,pins = "mpp24";
+				marvell,function = "gpio";
+			};
+			pmx_led_os_green: pmx-led-os-green {
+				marvell,pins = "mpp25";
+				marvell,function = "gpio";
+			};
+			pmx_led_usb_transfer: pmx-led-usb-transfer {
+				marvell,pins = "mpp27";
+				marvell,function = "gpio";
+			};
+			pmx_button_reset: pmx-button-reset {
+				marvell,pins = "mpp28";
+				marvell,function = "gpio";
+			};
+			pmx_button_usb_copy: pmx-button-usb-copy {
+				marvell,pins = "mpp29";
+				marvell,function = "gpio";
+			};
+		};
 		serial@12000 {
 			clock-frequency = <200000000>;
 			status = "okay";
