@@ -16,6 +16,27 @@
 	};
 
 	ocp@f1000000 {
+		pinctrl: pinctrl@10000 {
+			compatible = "marvell,88f6281-pinctrl";
+			reg = <0x10000 0x20>;
+
+			pinctrl-0 = < &pmx_usb_power_enable
+				      &pmx_led_green &pmx_led_orange >;
+			pinctrl-names = "default";
+
+			pmx_usb_power_enable: pmx-usb-power-enable {
+				marvell,pins = "mpp29";
+				marvell,function = "gpio";
+			};
+			pmx_led_green: pmx-led-green {
+				marvell,pins = "mpp46";
+				marvell,function = "gpio";
+			};
+			pmx_led_orange: pmx-led-orange {
+				marvell,pins = "mpp47";
+				marvell,function = "gpio";
+			};
+		};
 		serial@12000 {
 			clock-frequency = <200000000>;
 			status = "ok";
