@@ -544,6 +544,7 @@ config ARCH_DOVE
 config ARCH_KIRKWOOD
 	bool "Marvell Kirkwood"
 	select ARCH_REQUIRE_GPIOLIB
+	select ARCH_WANT_OPTIONAL_GPIOLIB
 	select CPU_FEROCEON
 	select GENERIC_CLOCKEVENTS
 	select PCI
