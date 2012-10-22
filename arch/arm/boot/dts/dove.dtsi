@@ -67,6 +67,11 @@
 			status = "disabled";
 		};
 
+		pinctrl: pinctrl@d0200 {
+			compatible = "marvell,dove-pinctrl";
+			reg = <0xd0200 0x20>;
+		};
+
 		gpio0: gpio@d0400 {
 			compatible = "marvell,orion-gpio";
 			#gpio-cells = <2>;
