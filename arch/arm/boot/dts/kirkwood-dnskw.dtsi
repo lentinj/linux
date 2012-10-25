@@ -40,9 +40,10 @@
 			compatible = "marvell,88f6281-pinctrl";
 			reg = <0x10000 0x20>;
 
-			pinctrl-0 = < &pmx_uart1 &pmx_sata1
+			pinctrl-0 = < &pmx_uart1
+				      &pmx_sata0 &pmx_sata1
 				      &pmx_gpio_24 &pmx_gpio_25
-				      &pmx_led_power &pmx_led_power
+				      &pmx_led_power
 				      &pmx_led_red_right_hdd
 				      &pmx_led_red_left_hdd
 				      &pmx_led_red_usb_325
@@ -63,9 +64,13 @@
 				marvell,pins = "mpp13", "mpp14";
 				marvell,function = "uart1";
 			};
-			pmx_sata1: pmx-sata1 {
-				marvell,pins = "mpp4", "mpp20", "mpp22";
+			pmx_sata0: pmx-sata0 {
+				marvell,pins = "mpp20";
 				marvell,function = "sata1";
+			};
+			pmx_sata1: pmx-sata1 {
+				marvell,pins = "mpp21";
+				marvell,function = "sata0";
 			};
 			pmx_gpio_24: pmx-gpio-24 {
 				marvell,pins = "mpp24";
@@ -105,7 +110,7 @@
 			};
 			pmx_gpio_33: pmx-gpio-33 {
 				marvell,pins = "mpp33";
-				marvell,function = "gpio";
+				marvell,function = "gpo";
 			};
 			pmx_button_power: pmx-button-power {
 				marvell,pins = "mpp34";
