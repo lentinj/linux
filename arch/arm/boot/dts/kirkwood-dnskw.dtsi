@@ -42,13 +42,10 @@
 
 			pinctrl-0 = < &pmx_uart1
 				      &pmx_sata0 &pmx_sata1
-				      &pmx_gpio_24 &pmx_gpio_25
 				      &pmx_led_power
 				      &pmx_led_red_right_hdd
 				      &pmx_led_red_left_hdd
 				      &pmx_led_red_usb_325
-				      &pmx_gpio_30 &pmx_gpio_31
-				      &pmx_gpio_32 &pmx_gpio_33
 				      &pmx_button_power
 				      &pmx_led_red_usb_320
 				      &pmx_power_off &pmx_power_back_on
@@ -72,14 +69,6 @@
 				marvell,pins = "mpp21";
 				marvell,function = "sata0";
 			};
-			pmx_gpio_24: pmx-gpio-24 {
-				marvell,pins = "mpp24";
-				marvell,function = "gpio";
-			};
-			pmx_gpio_25: pmx-gpio-25 {
-				marvell,pins = "mpp25";
-				marvell,function = "gpio";
-			};
 			pmx_led_power: pmx-led-power {
 				marvell,pins = "mpp26";
 				marvell,function = "gpio";
@@ -96,22 +85,6 @@
 				marvell,pins = "mpp29";
 				marvell,function = "gpio";
 			};
-			pmx_gpio_30: pmx-gpio-30 {
-				marvell,pins = "mpp30";
-				marvell,function = "gpio";
-			};
-			pmx_gpio_31: pmx-gpio-31 {
-				marvell,pins = "mpp31";
-				marvell,function = "gpio";
-			};
-			pmx_gpio_32: pmx-gpio-32 {
-				marvell,pins = "mpp32";
-				marvell,function = "gpio";
-			};
-			pmx_gpio_33: pmx-gpio-33 {
-				marvell,pins = "mpp33";
-				marvell,function = "gpo";
-			};
 			pmx_button_power: pmx-button-power {
 				marvell,pins = "mpp34";
 				marvell,function = "gpio";
@@ -126,10 +99,6 @@
 			};
 			pmx_power_back_on: pmx-power-back-on {
 				marvell,pins = "mpp37";
-				marvell,function = "gpio";
-			};
-			pmx_gpio_38: pmx-gpio-38 {
-				marvell,pins = "mpp38";
 				marvell,function = "gpio";
 			};
 			pmx_power_sata0: pmx-power-sata0 {
