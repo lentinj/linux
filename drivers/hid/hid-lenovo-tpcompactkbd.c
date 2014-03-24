@@ -16,6 +16,8 @@
 #include <linux/hid.h>
 #include <linux/module.h>
 
+#include "hid-ids.h"
+
 static unsigned int fnmode;
 module_param(fnmode, uint, 0644);
 MODULE_PARM_DESC(fnmode, "Fn lock mode ([0] = normal (Fn Lock toggles), 1 = Permanently on, 2 = Permanently off)");
