@@ -1,5 +1,6 @@
 /*
- *  HID driver for Lenovo ThinkPad USB Keyboard with TrackPoint
+ *  HID driver for Lenovo:-
+ *  * ThinkPad USB Keyboard with TrackPoint
  *
  *  Copyright (c) 2012 Bernhard Seibold
  */
@@ -35,7 +36,7 @@ struct tpkbd_data_pointer {
 
 #define map_key_clear(c) hid_map_usage_clear(hi, usage, bit, max, EV_KEY, (c))
 
-static int tpkbd_input_mapping(struct hid_device *hdev,
+static int tpkbd_input_mapping_tp(struct hid_device *hdev,
 		struct hid_input *hi, struct hid_field *field,
 		struct hid_usage *usage, unsigned long **bit, int *max)
 {
@@ -45,6 +46,15 @@ static int tpkbd_input_mapping(struct hid_device *hdev,
 		map_key_clear(KEY_MICMUTE);
 		return 1;
 	}
+	return 0;
+}
+
+static int tpkbd_input_mapping(struct hid_device *hdev,
+		struct hid_input *hi, struct hid_field *field,
+		struct hid_usage *usage, unsigned long **bit, int *max)
+{
+	if (hdev->product == USB_DEVICE_ID_LENOVO_TPKBD)
+		return tpkbd_input_mapping_tp(hdev, hi, field, usage, bit, max);
 	return 0;
 }
 
@@ -338,6 +348,11 @@ static int tpkbd_probe_tp(struct hid_device *hdev)
 	char *name_mute, *name_micmute;
 	int i;
 
+	/* Ignore unless tpkbd_input_mapping_tp marked it as a pointer */
+	if (!hid_get_drvdata(hdev))
+		return 0;
+	hid_set_drvdata(hdev, NULL);
+
 	/* Validate required reports. */
 	for (i = 0; i < 4; i++) {
 		if (!hid_validate_values(hdev, HID_FEATURE_REPORT, 4, i, 1))
@@ -408,12 +423,9 @@ static int tpkbd_probe(struct hid_device *hdev,
 		goto err;
 	}
 
-	if (hid_get_drvdata(hdev)) {
-		hid_set_drvdata(hdev, NULL);
-		ret = tpkbd_probe_tp(hdev);
-		if (ret)
-			goto err_hid;
-	}
+	if (hdev->product == USB_DEVICE_ID_LENOVO_TPKBD
+			&& tpkbd_probe_tp(hdev))
+		goto err_hid;
 
 	return 0;
 err_hid:
@@ -437,7 +449,10 @@ static void tpkbd_remove_tp(struct hid_device *hdev)
 
 static void tpkbd_remove(struct hid_device *hdev)
 {
-	if (hid_get_drvdata(hdev))
+	if (!hid_get_drvdata(hdev))
+		return;
+
+	if (hdev->product == USB_DEVICE_ID_LENOVO_TPKBD)
 		tpkbd_remove_tp(hdev);
 
 	hid_hw_stop(hdev);
