@@ -1,8 +1,11 @@
 /*
  *  HID driver for Lenovo:-
  *  * ThinkPad USB Keyboard with TrackPoint
+ *  * ThinkPad Compact Bluetooth Keyboard with TrackPoint
+ *  * ThinkPad Compact USB Keyboard with TrackPoint
  *
  *  Copyright (c) 2012 Bernhard Seibold
+ *  Copyright (c) 2014 Jamie Lentin <jm@lentin.co.uk>
  */
 
 /*
@@ -34,6 +37,10 @@ struct tpkbd_data_pointer {
 	int press_speed;
 };
 
+struct tpcompactkbd_sc {
+	unsigned int fn_lock;
+};
+
 #define map_key_clear(c) hid_map_usage_clear(hi, usage, bit, max, EV_KEY, (c))
 
 static int tpkbd_input_mapping_tp(struct hid_device *hdev,
@@ -49,16 +56,127 @@ static int tpkbd_input_mapping_tp(struct hid_device *hdev,
 	return 0;
 }
 
+static int tpcompactkbd_input_mapping(struct hid_device *hdev,
+		struct hid_input *hi, struct hid_field *field,
+		struct hid_usage *usage, unsigned long **bit, int *max)
+{
+	/* HID_UP_LNVENDOR = USB, HID_UP_MSVENDOR = BT */
+	if ((usage->hid & HID_USAGE_PAGE) == HID_UP_MSVENDOR ||
+	    (usage->hid & HID_USAGE_PAGE) == HID_UP_LNVENDOR) {
+		set_bit(EV_REP, hi->input->evbit);
+		switch (usage->hid & HID_USAGE) {
+		case 0x00f1: /* Fn-F4: Mic mute */
+			map_key_clear(KEY_MICMUTE);
+			return 1;
+		case 0x00f2: /* Fn-F5: Brightness down */
+			map_key_clear(KEY_BRIGHTNESSDOWN);
+			return 1;
+		case 0x00f3: /* Fn-F6: Brightness up */
+			map_key_clear(KEY_BRIGHTNESSUP);
+			return 1;
+		case 0x00f4: /* Fn-F7: External display (projector) */
+			map_key_clear(KEY_SWITCHVIDEOMODE);
+			return 1;
+		case 0x00f5: /* Fn-F8: Wireless */
+			map_key_clear(KEY_WLAN);
+			return 1;
+		case 0x00f6: /* Fn-F9: Control panel */
+			map_key_clear(KEY_CONFIG);
+			return 1;
+		case 0x00f8: /* Fn-F11: View open applications (3 boxes) */
+			map_key_clear(KEY_FN_F11);
+			return 1;
+		case 0x00fa: /* Fn-Esc: Fn-lock toggle */
+			map_key_clear(KEY_FN_ESC);
+			return 1;
+		case 0x00fb: /* Fn-F12: Open My computer (6 boxes) USB-only */
+			/* NB: This mapping is invented in raw_event below */
+			map_key_clear(KEY_FILE);
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
 static int tpkbd_input_mapping(struct hid_device *hdev,
 		struct hid_input *hi, struct hid_field *field,
 		struct hid_usage *usage, unsigned long **bit, int *max)
 {
 	if (hdev->product == USB_DEVICE_ID_LENOVO_TPKBD)
 		return tpkbd_input_mapping_tp(hdev, hi, field, usage, bit, max);
+	if (hdev->product == USB_DEVICE_ID_LENOVO_CUSBKBD)
+		return tpcompactkbd_input_mapping(hdev, hi, field, usage, bit, max);
+	if (hdev->product == USB_DEVICE_ID_LENOVO_CBTKBD)
+		return tpcompactkbd_input_mapping(hdev, hi, field, usage, bit, max);
 	return 0;
 }
 
 #undef map_key_clear
+
+/* Send a config command to the keyboard */
+static int tpcompactkbd_send_cmd(struct hid_device *hdev,
+			unsigned char byte2, unsigned char byte3)
+{
+	int ret;
+	unsigned char buf[] = {0x18, byte2, byte3};
+	unsigned char report_type = HID_OUTPUT_REPORT;
+
+	/* The USB keyboard accepts commands via SET_FEATURE */
+	if (hdev->product == USB_DEVICE_ID_LENOVO_CUSBKBD) {
+		buf[0] = 0x13;
+		report_type = HID_FEATURE_REPORT;
+	}
+
+	ret = hdev->hid_output_raw_report(hdev, buf, sizeof(buf), report_type);
+	return ret < 0 ? ret : 0; /* BT returns 0, USB returns sizeof(buf) */
+}
+
+/* Toggle fnlock on or off */
+static void tpcompactkbd_toggle_fnlock(struct hid_device *hdev)
+{
+	struct tpcompactkbd_sc *tpcsc = hid_get_drvdata(hdev);
+
+	tpcsc->fn_lock = !tpcsc->fn_lock;
+	if (tpcompactkbd_send_cmd(hdev, 0x05, tpcsc->fn_lock ? 0x01 : 0x00))
+		hid_err(hdev, "Fn-lock toggle failed\n");
+}
+
+static int tpkbd_event(struct hid_device *hdev, struct hid_field *field,
+		struct hid_usage *usage, __s32 value)
+{
+	if (!(hdev->claimed & HID_CLAIMED_INPUT) || !field->hidinput ||
+			!usage->type)
+		return 0;
+
+	/* Switch fn-lock on fn-esc */
+	if (unlikely(hdev->product == USB_DEVICE_ID_LENOVO_CBTKBD
+			&& usage->code == KEY_FN_ESC && value))
+		tpcompactkbd_toggle_fnlock(hdev);
+	/* TODO: Shold have a similar block for CUSBKBD, but kernel oopses */
+
+	return 0;
+}
+
+static int tpkbd_raw_event(struct hid_device *hdev,
+			struct hid_report *report, u8 *data, int size)
+{
+	/*
+	 * USB keyboard's Fn-F12 report holds down many other keys, and it's
+	 * own key is outside the usage page range. Remove extra keypresses and
+	 * remap to inside usage page.
+	 */
+	if (unlikely(hdev->product == USB_DEVICE_ID_LENOVO_CUSBKBD
+			&& size == 3
+			&& data[0] == 0x15
+			&& data[1] == 0x94
+			&& data[2] == 0x01)) {
+		data[1] = 0x0;
+		data[2] = 0x4;
+	}
+
+	return 0;
+}
 
 static int tpkbd_features_set(struct hid_device *hdev)
 {
@@ -406,6 +524,41 @@ static int tpkbd_probe_tp(struct hid_device *hdev)
 	return 0;
 }
 
+static int tpcompactkbd_probe(struct hid_device *hdev,
+			const struct hid_device_id *id)
+{
+	int ret;
+	struct tpcompactkbd_sc *tpcsc;
+
+	tpcsc = devm_kzalloc(&hdev->dev, sizeof(*tpcsc), GFP_KERNEL);
+	if (tpcsc == NULL) {
+		hid_err(hdev, "can't alloc keyboard descriptor\n");
+		return -ENOMEM;
+	}
+	hid_set_drvdata(hdev, tpcsc);
+
+	/* All the custom action happens on the mouse device for USB */
+	if (hdev->product == USB_DEVICE_ID_LENOVO_CUSBKBD
+			&& hdev->type != HID_TYPE_USBMOUSE) {
+		pr_debug("Ignoring keyboard half of device\n");
+		return 0;
+	}
+
+	/*
+	 * Tell the keyboard a driver understands it, and turn F7, F9, F11 into
+	 * regular keys
+	 */
+	ret = tpcompactkbd_send_cmd(hdev, 0x01, 0x03);
+	if (ret)
+		hid_warn(hdev, "Failed to switch F7/9/11 into regular keys\n");
+
+	/* Toggle once to init the state of fn-lock */
+	tpcsc->fn_lock = 0;
+	tpcompactkbd_toggle_fnlock(hdev);
+
+	return 0;
+}
+
 static int tpkbd_probe(struct hid_device *hdev,
 		const struct hid_device_id *id)
 {
@@ -425,6 +578,12 @@ static int tpkbd_probe(struct hid_device *hdev,
 
 	if (hdev->product == USB_DEVICE_ID_LENOVO_TPKBD
 			&& tpkbd_probe_tp(hdev))
+		goto err_hid;
+	if (hdev->product == USB_DEVICE_ID_LENOVO_CUSBKBD
+			&& tpcompactkbd_probe(hdev, id))
+		goto err_hid;
+	if (hdev->product == USB_DEVICE_ID_LENOVO_CBTKBD
+			&& tpcompactkbd_probe(hdev, id))
 		goto err_hid;
 
 	return 0;
@@ -460,6 +619,8 @@ static void tpkbd_remove(struct hid_device *hdev)
 
 static const struct hid_device_id tpkbd_devices[] = {
 	{ HID_USB_DEVICE(USB_VENDOR_ID_LENOVO, USB_DEVICE_ID_LENOVO_TPKBD) },
+	{ HID_USB_DEVICE(USB_VENDOR_ID_LENOVO, USB_DEVICE_ID_LENOVO_CUSBKBD) },
+	{ HID_BLUETOOTH_DEVICE(USB_VENDOR_ID_LENOVO, USB_DEVICE_ID_LENOVO_CBTKBD) },
 	{ }
 };
 
@@ -471,6 +632,8 @@ static struct hid_driver tpkbd_driver = {
 	.input_mapping = tpkbd_input_mapping,
 	.probe = tpkbd_probe,
 	.remove = tpkbd_remove,
+	.event = tpkbd_event,
+	.raw_event = tpkbd_raw_event,
 };
 module_hid_driver(tpkbd_driver);
 
