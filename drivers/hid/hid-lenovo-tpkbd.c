@@ -132,31 +132,57 @@ static int tpcompactkbd_send_cmd(struct hid_device *hdev,
 	return ret < 0 ? ret : 0; /* BT returns 0, USB returns sizeof(buf) */
 }
 
-/* Toggle fnlock on or off */
-static void tpcompactkbd_toggle_fnlock(struct hid_device *hdev)
+static void tpcompactkbd_features_set(struct hid_device *hdev)
 {
 	struct tpcompactkbd_sc *tpcsc = hid_get_drvdata(hdev);
 
-	tpcsc->fn_lock = !tpcsc->fn_lock;
 	if (tpcompactkbd_send_cmd(hdev, 0x05, tpcsc->fn_lock ? 0x01 : 0x00))
-		hid_err(hdev, "Fn-lock toggle failed\n");
+		hid_err(hdev, "Fn-lock setting failed\n");
 }
 
-static int tpkbd_event(struct hid_device *hdev, struct hid_field *field,
-		struct hid_usage *usage, __s32 value)
+static ssize_t tpcompactkbd_fn_lock_show(struct device *dev,
+		struct device_attribute *attr,
+		char *buf)
 {
-	if (!(hdev->claimed & HID_CLAIMED_INPUT) || !field->hidinput ||
-			!usage->type)
-		return 0;
+	struct hid_device *hdev = container_of(dev, struct hid_device, dev);
+	struct tpcompactkbd_sc *tpcsc = hid_get_drvdata(hdev);
 
-	/* Switch fn-lock on fn-esc */
-	if (unlikely(hdev->product == USB_DEVICE_ID_LENOVO_CBTKBD
-			&& usage->code == KEY_FN_ESC && value))
-		tpcompactkbd_toggle_fnlock(hdev);
-	/* TODO: Shold have a similar block for CUSBKBD, but kernel oopses */
-
-	return 0;
+	return snprintf(buf, PAGE_SIZE, "%u\n", tpcsc->fn_lock);
 }
+
+static ssize_t tpcompactkbd_fn_lock_store(struct device *dev,
+		struct device_attribute *attr,
+		const char *buf,
+		size_t count)
+{
+	struct hid_device *hdev = container_of(dev, struct hid_device, dev);
+	struct tpcompactkbd_sc *tpcsc = hid_get_drvdata(hdev);
+	int value;
+
+	if (kstrtoint(buf, 10, &value))
+		return -EINVAL;
+	if (value < 0 || value > 1)
+		return -EINVAL;
+
+	tpcsc->fn_lock = value;
+	tpcompactkbd_features_set(hdev);
+
+	return count;
+}
+
+static struct device_attribute dev_attr_pointer_fn_lock =
+	__ATTR(fn_lock, S_IWUSR | S_IRUGO,
+			tpcompactkbd_fn_lock_show,
+			tpcompactkbd_fn_lock_store);
+
+static struct attribute *tpcompactkbd_attributes[] = {
+	&dev_attr_pointer_fn_lock.attr,
+	NULL
+};
+
+static const struct attribute_group tpcompactkbd_attr_group = {
+	.attrs = tpcompactkbd_attributes,
+};
 
 static int tpkbd_raw_event(struct hid_device *hdev,
 			struct hid_report *report, u8 *data, int size)
@@ -552,9 +578,14 @@ static int tpcompactkbd_probe(struct hid_device *hdev,
 	if (ret)
 		hid_warn(hdev, "Failed to switch F7/9/11 into regular keys\n");
 
-	/* Toggle once to init the state of fn-lock */
-	tpcsc->fn_lock = 0;
-	tpcompactkbd_toggle_fnlock(hdev);
+	/* Init Fn-Lock in off state */
+	tpcsc->fn_lock = 1;
+	tpcompactkbd_features_set(hdev);
+
+	if (sysfs_create_group(&hdev->dev.kobj,
+				&tpcompactkbd_attr_group)) {
+		hid_warn(hdev, "Could not create sysfs group\n");
+	}
 
 	return 0;
 }
@@ -606,6 +637,12 @@ static void tpkbd_remove_tp(struct hid_device *hdev)
 	hid_set_drvdata(hdev, NULL);
 }
 
+static void tpcompactkbd_remove(struct hid_device *hdev)
+{
+	sysfs_remove_group(&hdev->dev.kobj,
+			&tpcompactkbd_attr_group);
+}
+
 static void tpkbd_remove(struct hid_device *hdev)
 {
 	if (!hid_get_drvdata(hdev))
@@ -613,6 +650,10 @@ static void tpkbd_remove(struct hid_device *hdev)
 
 	if (hdev->product == USB_DEVICE_ID_LENOVO_TPKBD)
 		tpkbd_remove_tp(hdev);
+	if (hdev->product == USB_DEVICE_ID_LENOVO_CUSBKBD)
+		tpcompactkbd_remove(hdev);
+	if (hdev->product == USB_DEVICE_ID_LENOVO_CBTKBD)
+		tpcompactkbd_remove(hdev);
 
 	hid_hw_stop(hdev);
 }
@@ -632,7 +673,6 @@ static struct hid_driver tpkbd_driver = {
 	.input_mapping = tpkbd_input_mapping,
 	.probe = tpkbd_probe,
 	.remove = tpkbd_remove,
-	.event = tpkbd_event,
 	.raw_event = tpkbd_raw_event,
 };
 module_hid_driver(tpkbd_driver);
