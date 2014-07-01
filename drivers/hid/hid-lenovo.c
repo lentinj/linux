@@ -83,7 +83,7 @@ static int lenovo_input_mapping_cptkbd(struct hid_device *hdev,
 			map_key_clear(KEY_CONFIG);
 			return 1;
 		case 0x00f8: /* Fn-F11: View open applications (3 boxes) */
-			map_key_clear(KEY_FN_F11);
+			map_key_clear(KEY_SCALE);
 			return 1;
 		case 0x00fa: /* Fn-Esc: Fn-lock toggle */
 			map_key_clear(KEY_FN_ESC);
