@@ -121,17 +121,19 @@ static int lenovo_input_mapping(struct hid_device *hdev,
 static int lenovo_send_cmd_cptkbd(struct hid_device *hdev,
 			unsigned char byte2, unsigned char byte3)
 {
-	int ret;
+	int ret = -EINVAL;
 	unsigned char buf[] = {0x18, byte2, byte3};
-	unsigned char report_type = HID_OUTPUT_REPORT;
 
-	/* The USB keyboard accepts commands via SET_FEATURE */
-	if (hdev->product == USB_DEVICE_ID_LENOVO_CUSBKBD) {
-		buf[0] = 0x13;
-		report_type = HID_FEATURE_REPORT;
+	switch (hdev->product) {
+	case USB_DEVICE_ID_LENOVO_CUSBKBD:
+		ret = hid_hw_raw_request(hdev, 0x13, buf, sizeof(buf),
+					HID_FEATURE_REPORT, HID_REQ_SET_REPORT);
+		break;
+	case USB_DEVICE_ID_LENOVO_CBTKBD:
+		ret = hid_hw_output_report(hdev, buf, sizeof(buf));
+		break;
 	}
 
-	ret = hdev->hid_output_raw_report(hdev, buf, sizeof(buf), report_type);
 	return ret < 0 ? ret : 0; /* BT returns 0, USB returns sizeof(buf) */
 }
 
