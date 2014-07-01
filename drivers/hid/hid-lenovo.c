@@ -560,9 +560,7 @@ static int lenovo_probe_tpkbd(struct hid_device *hdev) {
 	return 0;
 }
 
-static int lenovo_probe_cptkbd(struct hid_device *hdev,
-			const struct hid_device_id *id)
-{
+static int lenovo_probe_cptkbd(struct hid_device *hdev) {
 	int ret;
 	struct lenovo_drvdata_cptkbd *tpcsc;
 
@@ -622,7 +620,7 @@ static int lenovo_probe(struct hid_device *hdev,
 		break;
 	case USB_DEVICE_ID_LENOVO_CUSBKBD:
 	case USB_DEVICE_ID_LENOVO_CBTKBD:
-		ret = lenovo_probe_cptkbd(hdev, id);
+		ret = lenovo_probe_cptkbd(hdev);
 		break;
 	}
 	if (ret)
