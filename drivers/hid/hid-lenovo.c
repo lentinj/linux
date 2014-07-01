@@ -684,7 +684,7 @@ static const struct hid_device_id lenovo_devices[] = {
 MODULE_DEVICE_TABLE(hid, lenovo_devices);
 
 static struct hid_driver lenovo_driver = {
-	.name = "lenovo_tpkbd",
+	.name = "lenovo",
 	.id_table = lenovo_devices,
 	.input_mapping = lenovo_input_mapping,
 	.probe = lenovo_probe,
