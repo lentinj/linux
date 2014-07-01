@@ -37,7 +37,7 @@ struct lenovo_drvdata_tpkbd {
 };
 
 struct lenovo_drvdata_cptkbd {
-	unsigned int fn_lock;
+	bool fn_lock;
 };
 
 #define map_key_clear(c) hid_map_usage_clear(hi, usage, bit, max, EV_KEY, (c))
@@ -169,7 +169,7 @@ static ssize_t attr_fn_lock_store_cptkbd(struct device *dev,
 	if (value < 0 || value > 1)
 		return -EINVAL;
 
-	tpcsc->fn_lock = value;
+	tpcsc->fn_lock = !!value;
 	lenovo_features_set_cptkbd(hdev);
 
 	return count;
