@@ -578,7 +578,7 @@ static int lenovo_probe_cptkbd(struct hid_device *hdev,
 	/* All the custom action happens on the mouse device for USB */
 	if (hdev->product == USB_DEVICE_ID_LENOVO_CUSBKBD
 			&& hdev->type != HID_TYPE_USBMOUSE) {
-		pr_debug("Ignoring keyboard half of device\n");
+		hid_dbg(hdev, "Ignoring keyboard half of device\n");
 		return 0;
 	}
 
@@ -595,9 +595,8 @@ static int lenovo_probe_cptkbd(struct hid_device *hdev,
 	lenovo_features_set_cptkbd(hdev);
 
 	if (sysfs_create_group(&hdev->dev.kobj,
-				&lenovo_attr_group_cptkbd)) {
+				&lenovo_attr_group_cptkbd))
 		hid_warn(hdev, "Could not create sysfs group\n");
-	}
 
 	return 0;
 }
