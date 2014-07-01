@@ -106,12 +106,10 @@ static int lenovo_input_mapping(struct hid_device *hdev,
 	case USB_DEVICE_ID_LENOVO_TPKBD:
 		return lenovo_input_mapping_tpkbd(hdev, hi, field,
 							usage, bit, max);
-		break;
 	case USB_DEVICE_ID_LENOVO_CUSBKBD:
 	case USB_DEVICE_ID_LENOVO_CBTKBD:
 		return lenovo_input_mapping_cptkbd(hdev, hi, field,
 							usage, bit, max);
-		break;
 	}
 
 	return 0;
