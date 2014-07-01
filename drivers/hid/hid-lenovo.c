@@ -194,7 +194,7 @@ static int lenovo_raw_event(struct hid_device *hdev,
 {
 	/*
 	 * Compact USB keyboard's Fn-F12 report holds down many other keys, and
-	 * it's own key is outside the usage page range. Remove extra
+	 * its own key is outside the usage page range. Remove extra
 	 * keypresses and remap to inside usage page.
 	 */
 	if (unlikely(hdev->product == USB_DEVICE_ID_LENOVO_CUSBKBD
