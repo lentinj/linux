@@ -1,5 +1,5 @@
 /*
- *  HID driver for Lenovo:-
+ *  HID driver for Lenovo:
  *  - ThinkPad USB Keyboard with TrackPoint (tpkbd)
  *  - ThinkPad Compact Bluetooth Keyboard with TrackPoint (cptkbd)
  *  - ThinkPad Compact USB Keyboard with TrackPoint (cptkbd)
