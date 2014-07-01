@@ -489,9 +489,7 @@ static void lenovo_led_brightness_set_tpkbd(struct led_classdev *led_cdev,
 	hid_hw_request(hdev, report, HID_REQ_SET_REPORT);
 }
 
-static int lenovo_probe_tpkbd(struct hid_device *hdev,
-			const struct hid_device_id *id)
-{
+static int lenovo_probe_tpkbd(struct hid_device *hdev) {
 	struct device *dev = &hdev->dev;
 	struct lenovo_drvdata_tpkbd *data_pointer;
 	size_t name_sz = strlen(dev_name(dev)) + 16;
@@ -620,7 +618,7 @@ static int lenovo_probe(struct hid_device *hdev,
 
 	switch (hdev->product) {
 	case USB_DEVICE_ID_LENOVO_TPKBD:
-		ret = lenovo_probe_tpkbd(hdev, id);
+		ret = lenovo_probe_tpkbd(hdev);
 		break;
 	case USB_DEVICE_ID_LENOVO_CUSBKBD:
 	case USB_DEVICE_ID_LENOVO_CBTKBD:
