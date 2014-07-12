@@ -1,5 +1,6 @@
 /*
- *  HID driver for Lenovo ThinkPad USB Keyboard with TrackPoint
+ *  HID driver for Lenovo:
+ *  - ThinkPad USB Keyboard with TrackPoint (tpkbd)
  *
  *  Copyright (c) 2012 Bernhard Seibold
  */
@@ -44,6 +45,19 @@ static int lenovo_input_mapping_tpkbd(struct hid_device *hdev,
 		map_key_clear(KEY_MICMUTE);
 		return 1;
 	}
+	return 0;
+}
+
+static int lenovo_input_mapping(struct hid_device *hdev,
+		struct hid_input *hi, struct hid_field *field,
+		struct hid_usage *usage, unsigned long **bit, int *max)
+{
+	switch (hdev->product) {
+	case USB_DEVICE_ID_LENOVO_TPKBD:
+		return lenovo_input_mapping_tpkbd(hdev, hi, field,
+							usage, bit, max);
+	}
+
 	return 0;
 }
 
@@ -337,6 +351,16 @@ static int lenovo_probe_tpkbd(struct hid_device *hdev)
 	char *name_mute, *name_micmute;
 	int i;
 
+	/*
+	 * If this is the pointer half of the keyboard, input_mapping should
+	 * have set drvdata to 1. Otherwise, it's the keyboard which needs
+	 * nothing special doing to it.
+	 */
+	if (!hid_get_drvdata(hdev))
+		return 0;
+
+	hid_set_drvdata(hdev, NULL);
+
 	/* Validate required reports. */
 	for (i = 0; i < 4; i++) {
 		if (!hid_validate_values(hdev, HID_FEATURE_REPORT, 4, i, 1))
@@ -409,12 +433,13 @@ static int lenovo_probe(struct hid_device *hdev,
 		goto err;
 	}
 
-	if (hid_get_drvdata(hdev)) {
-		hid_set_drvdata(hdev, NULL);
+	switch (hdev->product) {
+	case USB_DEVICE_ID_LENOVO_TPKBD:
 		ret = lenovo_probe_tpkbd(hdev);
-		if (ret)
-			goto err_hid;
+		break;
 	}
+	if (ret)
+		goto err_hid;
 
 	return 0;
 err_hid:
@@ -430,6 +455,9 @@ static void lenovo_remove_tpkbd(struct hid_device *hdev)
 	sysfs_remove_group(&hdev->dev.kobj,
 			&lenovo_attr_group_tpkbd);
 
+	if (data_pointer == NULL)
+		return;
+
 	led_classdev_unregister(&data_pointer->led_micmute);
 	led_classdev_unregister(&data_pointer->led_mute);
 
@@ -438,8 +466,11 @@ static void lenovo_remove_tpkbd(struct hid_device *hdev)
 
 static void lenovo_remove(struct hid_device *hdev)
 {
-	if (hid_get_drvdata(hdev))
+	switch (hdev->product) {
+	case USB_DEVICE_ID_LENOVO_TPKBD:
 		lenovo_remove_tpkbd(hdev);
+		break;
+	}
 
 	hid_hw_stop(hdev);
 }
@@ -454,7 +485,7 @@ MODULE_DEVICE_TABLE(hid, lenovo_devices);
 static struct hid_driver lenovo_driver = {
 	.name = "lenovo",
 	.id_table = lenovo_devices,
-	.input_mapping = lenovo_input_mapping_tpkbd,
+	.input_mapping = lenovo_input_mapping,
 	.probe = lenovo_probe,
 	.remove = lenovo_remove,
 };
