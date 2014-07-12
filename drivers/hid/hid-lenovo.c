@@ -121,7 +121,7 @@ static int lenovo_input_mapping(struct hid_device *hdev,
 static int lenovo_send_cmd_cptkbd(struct hid_device *hdev,
 			unsigned char byte2, unsigned char byte3)
 {
-	int ret = -EINVAL;
+	int ret;
 	unsigned char buf[] = {0x18, byte2, byte3};
 
 	switch (hdev->product) {
@@ -132,6 +132,8 @@ static int lenovo_send_cmd_cptkbd(struct hid_device *hdev,
 	case USB_DEVICE_ID_LENOVO_CBTKBD:
 		ret = hid_hw_output_report(hdev, buf, sizeof(buf));
 		break;
+	default:
+		ret = -EINVAL;
 	}
 
 	return ret < 0 ? ret : 0; /* BT returns 0, USB returns sizeof(buf) */
