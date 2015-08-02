@@ -748,6 +748,15 @@ static void lenovo_remove_cptkbd(struct hid_device *hdev)
 {
 	sysfs_remove_group(&hdev->dev.kobj,
 			&lenovo_attr_group_cptkbd);
+
+	if (hdev->product == USB_DEVICE_ID_LENOVO_CUSBKBD
+			&& hdev->type != HID_TYPE_USBMOUSE) {
+		hid_dbg(hdev, "Ignoring keyboard half of device\n");
+		return;
+	}
+
+	/* Revert middle-mouse-button mode, ignore any failures */
+	lenovo_send_cmd_cptkbd(hdev, 0x09, 0x00);
 }
 
 static void lenovo_remove(struct hid_device *hdev)
