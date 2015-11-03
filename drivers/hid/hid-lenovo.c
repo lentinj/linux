@@ -202,10 +202,14 @@ static int lenovo_send_cmd_cptkbd(struct hid_device *hdev,
 	return ret < 0 ? ret : 0; /* BT returns 0, USB returns sizeof(buf) */
 }
 
-static void lenovo_features_set_cptkbd(struct hid_device *hdev)
+/* Set features for USB Compact Keyboard.
+ * During PM reset_resume we can not access the driver data so in_resume
+ * should be false when called in that context.
+ */
+static void lenovo_features_set_cptkbd(struct hid_device *hdev, bool in_reset)
 {
 	int ret;
-	struct lenovo_drvdata_cptkbd *cptkbd_data = hid_get_drvdata(hdev);
+	struct lenovo_drvdata_cptkbd *cptkbd_data;
 
 	/* Force Fn-F7/9/11 to send single (nonstandard) keypresses */
 	ret = lenovo_send_cmd_cptkbd(hdev, 0x01, 0x03);
@@ -217,13 +221,17 @@ static void lenovo_features_set_cptkbd(struct hid_device *hdev)
 	if (ret)
 		hid_warn(hdev, "Middle-button mode setting failed: %d\n", ret);
 
-	ret = lenovo_send_cmd_cptkbd(hdev, 0x05, cptkbd_data->fn_lock);
-	if (ret)
-		hid_err(hdev, "Fn-lock setting failed: %d\n", ret);
+	if (!in_reset) {
+		cptkbd_data = hid_get_drvdata(hdev);
+		ret = lenovo_send_cmd_cptkbd(hdev, 0x05, cptkbd_data->fn_lock);
+		if (ret)
+			hid_err(hdev, "Fn-lock setting failed: %d\n", ret);
 
-	ret = lenovo_send_cmd_cptkbd(hdev, 0x02, cptkbd_data->sensitivity);
-	if (ret)
-		hid_err(hdev, "Sensitivity setting failed: %d\n", ret);
+		ret = lenovo_send_cmd_cptkbd(hdev, 0x02,
+					     cptkbd_data->sensitivity);
+		if (ret)
+			hid_err(hdev, "Sensitivity setting failed: %d\n", ret);
+	}
 }
 
 static ssize_t attr_fn_lock_show_cptkbd(struct device *dev,
@@ -251,7 +259,7 @@ static ssize_t attr_fn_lock_store_cptkbd(struct device *dev,
 		return -EINVAL;
 
 	cptkbd_data->fn_lock = !!value;
-	lenovo_features_set_cptkbd(hdev);
+	lenovo_features_set_cptkbd(hdev, false);
 
 	return count;
 }
@@ -280,7 +288,7 @@ static ssize_t attr_sensitivity_store_cptkbd(struct device *dev,
 		return -EINVAL;
 
 	cptkbd_data->sensitivity = value;
-	lenovo_features_set_cptkbd(hdev);
+	lenovo_features_set_cptkbd(hdev, false);
 
 	return count;
 }
@@ -756,7 +764,7 @@ static int lenovo_probe_cptkbd(struct hid_device *hdev)
 	cptkbd_data->middlebutton_state = 0;
 	cptkbd_data->fn_lock = true;
 	cptkbd_data->sensitivity = 0x05;
-	lenovo_features_set_cptkbd(hdev);
+	lenovo_features_set_cptkbd(hdev, false);
 
 	ret = sysfs_create_group(&hdev->dev.kobj, &lenovo_attr_group_cptkbd);
 	if (ret)
@@ -868,7 +876,7 @@ static int lenovo_resume(struct hid_device *hdev)
 	switch (hdev->product) {
 	case USB_DEVICE_ID_LENOVO_CUSBKBD:
 	case USB_DEVICE_ID_LENOVO_CBTKBD:
-		lenovo_features_set_cptkbd(hdev);
+		lenovo_features_set_cptkbd(hdev, false);
 		break;
 	}
 
@@ -880,7 +888,7 @@ static int lenovo_reset_resume(struct hid_device *hdev)
 	switch (hdev->product) {
 	case USB_DEVICE_ID_LENOVO_CUSBKBD:
 	case USB_DEVICE_ID_LENOVO_CBTKBD:
-		lenovo_features_set_cptkbd(hdev);
+		lenovo_features_set_cptkbd(hdev, true);
 		break;
 	}
 
