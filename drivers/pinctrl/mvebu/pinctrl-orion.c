@@ -177,6 +177,16 @@ static struct pinctrl_gpio_range mv88f5281_gpio_ranges[] = {
 	MPP_GPIO_RANGE(0, 0, 0, 16),
 };
 
+static struct mvebu_pinctrl_soc_info mv88f5181_info = {
+	.variant = V_5181L,
+	.controls = orion_mpp_controls,
+	.ncontrols = ARRAY_SIZE(orion_mpp_controls),
+	.modes = orion_mpp_modes,
+	.nmodes = ARRAY_SIZE(orion_mpp_modes),
+	.gpioranges = mv88f5181l_gpio_ranges,
+	.ngpioranges = ARRAY_SIZE(mv88f5181l_gpio_ranges),
+};
+
 static struct mvebu_pinctrl_soc_info mv88f5181l_info = {
 	.variant = V_5181L,
 	.controls = orion_mpp_controls,
@@ -212,6 +222,7 @@ static struct mvebu_pinctrl_soc_info mv88f5281_info = {
  * muxing, they are identical.
  */
 static const struct of_device_id orion_pinctrl_of_match[] = {
+	{ .compatible = "marvell,88f5181-pinctrl", .data = &mv88f5181_info },
 	{ .compatible = "marvell,88f5181l-pinctrl", .data = &mv88f5181l_info },
 	{ .compatible = "marvell,88f5182-pinctrl", .data = &mv88f5182_info },
 	{ .compatible = "marvell,88f5281-pinctrl", .data = &mv88f5281_info },
