@@ -17,19 +17,18 @@
 		internal-regs {
 			pinctrl: pinctrl@10000 {
 				compatible = "marvell,88f5181-pinctrl";
-				/*TODO: Does 5181 have MPP_0_7_CTRL & MPP_16_19_CTRL? */
 				reg = <0x10000 0x8>, <0x10050 0x4>;
+				/*
+				TODO: From board/mv88fxx81/Soc/ctrlEnv/MV_88FXX81/mvCtrlEnvSpec.h
+				#define MPP_CONTROL_REG0                                0x10000
+				#define MPP_CONTROL_REG1                                0x10004
+				#define MPP_CONTROL_REG2                                0x10050
+				#define DEV_MULTI_CONTROL                               0x10008
+				*/
 			};
 
 			core_clk: core-clocks@10030 {
 				compatible = "marvell,mv88f5181-core-clock";
-				/*TODO:
-				    sched_clock: 32 bits at 166MHz, resolution 6ns, wraps every 25769803770ns
-				    Calibrating delay loop... 331.77 BogoMIPS (lpj=1658880)
-				    should be:-
-				    sched_clock: 32 bits at 166MHz, resolution 5ns, wraps every 25769ms
-				    Calibrating delay loop... 331.77 BogoMIPS (lpj=1658880)
-				*/
 				reg = <0x10010 0x4>;
 				#clock-cells = <1>;
 			};
