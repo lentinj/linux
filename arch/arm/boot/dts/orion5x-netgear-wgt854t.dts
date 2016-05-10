@@ -158,7 +158,7 @@
 };
 
 &pinctrl {
-	pinctrl-0 = <&pmx_pci_gpios>;
+	pinctrl-0 = <&pmx_pci_gpios &pmx_ge>;
 	pinctrl-names = "default";
 
 	pmx_power_led: pmx-power-led {
@@ -184,6 +184,11 @@
 	pmx_pci_gpios: pmx-pci-gpios {
 		marvell,pins = "mpp4";
 		marvell,function = "gpio";
+	};
+
+	pmx_ge: pmx-ge {
+		marvell,pins = "mpp8 mpp9 mpp10 mpp11 mpp12 mpp13 mpp14 mpp15 mpp16 mpp17 mpp18 mpp19";
+		marvell,function = "ge";
 	};
 };
 
