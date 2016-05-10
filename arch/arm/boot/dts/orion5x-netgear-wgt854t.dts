@@ -72,7 +72,7 @@
 
 	flash@0 {
 		compatible = "cfi-flash";
-		reg = <0 0x80000>;
+		reg = <0 0x800000>;
 		bank-width = <1>;
 		#address-cells = <1>;
 		#size-cells = <1>;
@@ -89,12 +89,13 @@
 
 		partition@760000 {
 			label = "uboot_env";
-			reg = <0x760000 0x10000>;
+			reg = <0x760000 0x20000>;
 		};
 
-		partition@770000 {
+		partition@780000 {
 			label = "uboot";
-			reg = <0x770000 0x90000>;
+			reg = <0x780000 0x80000>;
+			read-only;
 		};
 	};
 };
