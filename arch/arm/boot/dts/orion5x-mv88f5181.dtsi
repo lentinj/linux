@@ -18,13 +18,6 @@
 			pinctrl: pinctrl@10000 {
 				compatible = "marvell,88f5181-pinctrl";
 				reg = <0x10000 0x8>, <0x10050 0x4>;
-				/*
-				TODO: From board/mv88fxx81/Soc/ctrlEnv/MV_88FXX81/mvCtrlEnvSpec.h
-				#define MPP_CONTROL_REG0                                0x10000
-				#define MPP_CONTROL_REG1                                0x10004
-				#define MPP_CONTROL_REG2                                0x10050
-				#define DEV_MULTI_CONTROL                               0x10008
-				*/
 			};
 
 			core_clk: core-clocks@10030 {
