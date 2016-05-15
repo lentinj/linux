@@ -5631,7 +5631,8 @@ static void mwl8k_finalize_join_worker(struct work_struct *work)
 }
 
 enum {
-	MWL8363 = 0,
+	MWL8361P = 0,
+	MWL8363,
 	MWL8687,
 	MWL8366,
 	MWL8764,
@@ -5646,6 +5647,11 @@ enum {
 #define MWL8K_8764_AP_FW(api) _MWL8K_8764_AP_FW(api)
 
 static struct mwl8k_device_info mwl8k_info_tbl[] = {
+	[MWL8361P] = {
+		.part_name	= "88w8361p",
+		.helper_image	= "mwl8k/helper_8361p.fw",
+		.fw_image_sta	= "mwl8k/fmimage_8361p.fw",
+	},
 	[MWL8363] = {
 		.part_name	= "88w8363",
 		.helper_image	= "mwl8k/helper_8363.fw",
@@ -5672,6 +5678,8 @@ static struct mwl8k_device_info mwl8k_info_tbl[] = {
 	},
 };
 
+MODULE_FIRMWARE("mwl8k/helper_8361p.fw");
+MODULE_FIRMWARE("mwl8k/fmimage_8361p.fw");
 MODULE_FIRMWARE("mwl8k/helper_8363.fw");
 MODULE_FIRMWARE("mwl8k/fmimage_8363.fw");
 MODULE_FIRMWARE("mwl8k/helper_8687.fw");
@@ -5681,7 +5689,7 @@ MODULE_FIRMWARE("mwl8k/fmimage_8366.fw");
 MODULE_FIRMWARE(MWL8K_8366_AP_FW(MWL8K_8366_AP_FW_API));
 
 static const struct pci_device_id mwl8k_pci_id_table[] = {
-	{ PCI_VDEVICE(MARVELL, 0x2a02), .driver_data = MWL8363, },
+	{ PCI_VDEVICE(MARVELL, 0x2a02), .driver_data = MWL8361P, },
 	{ PCI_VDEVICE(MARVELL, 0x2a0a), .driver_data = MWL8363, },
 	{ PCI_VDEVICE(MARVELL, 0x2a0c), .driver_data = MWL8363, },
 	{ PCI_VDEVICE(MARVELL, 0x2a24), .driver_data = MWL8363, },
