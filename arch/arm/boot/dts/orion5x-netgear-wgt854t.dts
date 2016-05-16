@@ -188,9 +188,8 @@
 	};
 
 	pmx_ge: pmx-ge {
-		marvell,pins = "mpp8", "mpp9", "mpp10", "mpp11", "mpp12",
-				"mpp13", "mpp14", "mpp15", "mpp16", "mpp17",
-				"mpp18", "mpp19";
+		marvell,pins = "mpp9", "mpp12",	"mpp13", "mpp14", "mpp15",
+				"mpp16", "mpp17", "mpp18", "mpp19";
 		marvell,function = "ge";
 	};
 };
