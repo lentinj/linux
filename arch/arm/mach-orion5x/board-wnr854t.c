@@ -27,12 +27,12 @@ static void __init wnr854t_pci_preinit(void)
 		if (gpio_direction_input(pin) == 0) {
 			irq_set_irq_type(gpio_to_irq(pin), IRQ_TYPE_LEVEL_LOW);
 		} else {
-			printk(KERN_ERR "wnr854t_pci_preinit failed to "
-					"set_irq_type pin %d\n", pin);
+			pr_err("wnr854t_pci_preinit failed to set_irq_type pin %d\n",
+				pin);
 			gpio_free(pin);
 		}
 	} else {
-		printk(KERN_ERR "wnr854t_pci_preinit failed to request gpio %d\n", pin);
+		pr_err("wnr854t_pci_preinit failed to request gpio %d\n", pin);
 	}
 }
 
@@ -74,5 +74,5 @@ static int __init wnr854t_pci_init(void)
 
 	return 0;
 }
-
-late_initcall(wnr854t_pci_init);  /* NB: Use late_initcall so we can gpio_request() */
+/* NB: Use late_initcall so we can gpio_request() without being deferred */
+late_initcall(wnr854t_pci_init);

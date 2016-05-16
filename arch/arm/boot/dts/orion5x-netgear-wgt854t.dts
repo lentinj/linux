@@ -14,7 +14,8 @@
 
 / {
 	model = "Netgear WGT854-t";
-	compatible = "netgear,wgt854t", "marvell,orion5x-88f5181-b1", "marvell,orion5x-88f5181", "marvell,orion5x";
+	compatible = "netgear,wgt854t", "marvell,orion5x-88f5181",
+			"marvell,orion5x";
 
 	memory {
 		reg = <0x00000000 0x2000000>; /* 32 MB */
@@ -27,8 +28,8 @@
 
 	soc {
 		ranges = <MBUS_ID(0xf0, 0x01) 0 0xf1000000 0x100000>,
-		         <MBUS_ID(0x09, 0x00) 0 0xf2200000 0x800>,
-			 <MBUS_ID(0x01, 0x0f) 0 0xf4000000 0x800000>;
+			<MBUS_ID(0x09, 0x00) 0 0xf2200000 0x800>,
+			<MBUS_ID(0x01, 0x0f) 0 0xf4000000 0x800000>;
 	};
 
 	gpio-keys {
@@ -187,11 +188,14 @@
 	};
 
 	pmx_ge: pmx-ge {
-		marvell,pins = "mpp8", "mpp9", "mpp10", "mpp11", "mpp12", "mpp13", "mpp14", "mpp15", "mpp16", "mpp17", "mpp18", "mpp19";
+		marvell,pins = "mpp8", "mpp9", "mpp10", "mpp11", "mpp12",
+				"mpp13", "mpp14", "mpp15", "mpp16", "mpp17",
+				"mpp18", "mpp19";
 		marvell,function = "ge";
 	};
 };
 
 &uart0 {
+	/* Pin 1: Tx, Pin 7: Rx, Pin 8: Gnd */
 	status = "okay";
 };
