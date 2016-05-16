@@ -60,7 +60,7 @@
 		};
 
 		led@2 {
-			label = "wan:amber";
+			label = "wan:green";
 			gpios = <&gpio0 3 GPIO_ACTIVE_LOW>;
 		};
 	};
