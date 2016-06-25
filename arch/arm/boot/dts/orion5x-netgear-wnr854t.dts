@@ -197,7 +197,9 @@
 
 &eth {
 	status = "okay";
+
 	ethernet-port@0 {
+		/* Connected to DSA, fix speeds */
 		speed = <1000>;
 		duplex = <1>;
 	};
