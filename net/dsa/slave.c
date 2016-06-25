@@ -909,7 +909,8 @@ static int dsa_slave_fixed_link_update(struct net_device *dev,
 /* slave device setup *******************************************************/
 static int dsa_slave_phy_connect(struct dsa_slave_priv *p,
 				 struct net_device *slave_dev,
-				 int addr)
+				 int addr,
+				 struct device_node *phy_dn)
 {
 	struct dsa_switch *ds = p->parent;
 
@@ -918,6 +919,8 @@ static int dsa_slave_phy_connect(struct dsa_slave_priv *p,
 		netdev_err(slave_dev, "no phy at %d\n", addr);
 		return -ENODEV;
 	}
+
+	if (phy_dn) p->phy->mdio.dev.of_node = phy_dn;
 
 	/* Use already configured phy mode */
 	if (p->phy_interface == PHY_INTERFACE_MODE_NA)
@@ -971,7 +974,7 @@ static int dsa_slave_phy_setup(struct dsa_slave_priv *p,
 		 */
 		if (!phy_is_fixed && phy_id >= 0 &&
 		    (ds->phys_mii_mask & (1 << phy_id))) {
-			ret = dsa_slave_phy_connect(p, slave_dev, phy_id);
+			ret = dsa_slave_phy_connect(p, slave_dev, phy_id, phy_dn);
 			if (ret) {
 				netdev_err(slave_dev, "failed to connect to phy%d: %d\n", phy_id, ret);
 				return ret;
@@ -991,7 +994,7 @@ static int dsa_slave_phy_setup(struct dsa_slave_priv *p,
 	 * MDIO bus instead
 	 */
 	if (!p->phy) {
-		ret = dsa_slave_phy_connect(p, slave_dev, p->port);
+		ret = dsa_slave_phy_connect(p, slave_dev, p->port, NULL);
 		if (ret) {
 			netdev_err(slave_dev, "failed to connect to port %d: %d\n", p->port, ret);
 			return ret;
