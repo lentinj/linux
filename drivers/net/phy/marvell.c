@@ -414,6 +414,10 @@ static int m88e1121_config_aneg(struct phy_device *phydev)
 	phy_write(phydev, MII_MARVELL_PHY_PAGE, oldpage);
 
 	err = genphy_config_aneg(phydev);
+	if (err < 0)
+		return err;
+
+	err = marvell_of_reg_init(phydev);
 
 	return err;
 }
