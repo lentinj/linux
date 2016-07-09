@@ -920,7 +920,9 @@ static int dsa_slave_phy_connect(struct dsa_slave_priv *p,
 		return -ENODEV;
 	}
 
-	if (phy_dn) p->phy->mdio.dev.of_node = phy_dn;
+	/* If a phy OF node was found, link the slave MDIO bus to it */
+	if (phy_dn && p->phy->mdio.dev.of_node == NULL)
+		p->phy->mdio.dev.of_node = phy_dn;
 
 	/* Use already configured phy mode */
 	if (p->phy_interface == PHY_INTERFACE_MODE_NA)
