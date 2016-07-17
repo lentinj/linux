@@ -105,10 +105,11 @@
 	status = "okay";
 
 	switch: switch@0 {
-		compatible = "marvell,mv88e6131";
+		compatible = "marvell,mv88e6085";
 		#address-cells = <1>;
 		#size-cells = <0>;
 		reg = <0>;
+		dsa,member = <0 0>;
 
 		ports {
 			#address-cells = <1>;
@@ -132,11 +133,7 @@
 			port@3 {
 				reg = <3>;
 				label = "cpu";
-				ethernet = <&eth>;
-				fixed-link {
-					speed = <1000>;
-					full-duplex;
-				};
+				ethernet = <&ethport>;
 			};
 
 			port@5 {
@@ -154,6 +151,10 @@
 
 &eth {
 	status = "okay";
+	ethernet-port@0 {
+		speed = <1000>;
+		duplex = <1>;
+	};
 };
 
 &pinctrl {
