@@ -3375,6 +3375,10 @@ static void mv88e6xxx_mdio_unregister(struct mv88e6xxx_chip *chip)
 {
 	struct mii_bus *bus = chip->mdio_bus;
 
+	/* Stop any timers attempting to re-activate the PPU */
+	del_timer(&chip->ppu_timer);
+	usleep_range(1000, 2000);
+
 	mdiobus_unregister(bus);
 
 	if (chip->mdio_np)
