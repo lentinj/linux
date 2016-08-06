@@ -17,6 +17,7 @@
 
 	aliases {
 		gpio0 = &gpio0;
+		serial0 = &uart0;
 	};
 
 	soc {
